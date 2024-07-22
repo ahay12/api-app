@@ -1,12 +1,24 @@
 package main
 
 import (
-	"api-apps/database"
+	"database/sql"
+	"github.com/ahay12/api-app/database"
+	"github.com/ahay12/api-app/router"
 	"log"
 )
 
 func main() {
-	database.InitDatabase()
-
+	db := database.InitDatabase()
+	sqlDB, err := db.DB()
+	if err != nil {
+		log.Fatal("Failed to connect to database")
+	}
+	defer func(sqlDB *sql.DB) {
+		err := sqlDB.Close()
+		if err != nil {
+			log.Fatal("Failed to close database connection")
+		}
+	}(sqlDB)
+	app := router.Make()
 	log.Fatal(app.Listen(":4000"))
 }
