@@ -19,11 +19,11 @@ func Make() *fiber.App {
 	app.Use(Cors())
 	v1 := app.Group("/api/v1")
 	{
-		v1.Get("/products", service.GetProducts)
-		v1.Get("/products/:id", service.GetProduct)
-		v1.Post("/products", service.CreateProduct)
-		v1.Put("/products/:id", service.UpdateProduct)
-		v1.Delete("/products/:id", service.DeleteProduct)
+		v1.Get("/articles", service.GetArticles)
+		v1.Get("/article/:id", service.GetArticle)
+		v1.Post("/article", service.CreateArticle)
+		v1.Put("/article/:id", service.UpdateArticle)
+		v1.Delete("/article/:id", service.DeleteArticle)
 	}
 	{
 		v1.Get("/users", service.GetUsers)
