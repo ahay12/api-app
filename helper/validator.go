@@ -1,8 +1,9 @@
 package helper
 
 import (
-	"github.com/go-playground/validator/v10"
 	"unicode"
+
+	"github.com/go-playground/validator/v10"
 )
 
 func ConstructErrors(err error) []ErrorField {
@@ -19,8 +20,8 @@ func ConstructErrors(err error) []ErrorField {
 				fieldErrorMessage = "Required"
 			case "alpha":
 				fieldErrorMessage = "Only letters allowed"
-			case "product_name":
-				fieldErrorMessage = "Product name must be unique"
+				// case "product_name":
+				// 	fieldErrorMessage = "Product name must be unique"
 			}
 			errorFields = append(errorFields, ErrorField{
 				fieldIDString, fieldValue, fieldErrorCaused, fieldErrorMessage})

@@ -16,26 +16,16 @@ type ErrorField struct {
 }
 
 func RespondJSON(ctx *fiber.Ctx, status int, message string, payload interface{}, errors interface{}) {
-	var res ResponseData
-
-	if status >= 200 && status < 300 {
-		res.Success = true
+	res := ResponseData{
+		Success: status >= 200 && status < 300,
+		Message: message,
+		Data:    payload,
+		Error:   errors,
 	}
 
-	if len(message) != 0 {
-		res.Message = message
-	}
-
-	if payload != nil {
-		res.Data = payload
-	}
-
-	if errors != nil {
-		res.Error = errors
-	}
-
-	err := ctx.JSON(res)
-	if err != nil {
-		ctx.Status(500).JSON(fiber.Map{"error": "Internal Server Error"})
+	// Send the JSON response and ignore the error since the response is the primary concern
+	if err := ctx.Status(status).JSON(res); err != nil {
+		// Log the error and send a generic internal server error response
+		ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Internal Server Error"})
 	}
 }

@@ -8,59 +8,79 @@ import (
 )
 
 func GetArticles(ctx *fiber.Ctx) error {
-	var Articles []model.News
+	var articles []model.News
 	DB := database.DB
-	DB.Find(&Articles)
-	err := ctx.JSON(Articles)
-	if err != nil {
+	if err := DB.Find(&articles).Error; err != nil {
+		helper.RespondJSON(ctx, fiber.StatusInternalServerError, "Failed to fetch articles", nil, err.Error())
 		return err
 	}
-	return err
+
+	helper.RespondJSON(ctx, fiber.StatusOK, "Articles fetched successfully", articles, nil)
+	return nil
 }
 
 func GetArticle(ctx *fiber.Ctx) error {
 	id := ctx.Params("id")
-	var Article model.News
-	database.DB.First(&Article, id)
+	var article model.News
+	if err := database.DB.First(&article, id).Error; err != nil {
+		helper.RespondJSON(ctx, fiber.StatusNotFound, "Article not found", nil, err.Error())
+	}
 
-	if Article.ID != 0 {
-		helper.RespondJSON(ctx, 200, "", Article, nil)
+	if article.ID != 0 {
+		helper.RespondJSON(ctx, fiber.StatusOK, "Success get article", article, nil)
 	} else {
-		helper.RespondJSON(ctx, 404, "News not found", nil, nil)
+		helper.RespondJSON(ctx, fiber.StatusNotFound, "News not found", nil, nil)
 	}
 	return nil
 }
 
 func CreateArticle(ctx *fiber.Ctx) error {
-	Article := new(model.News)
-	if err := ctx.BodyParser(Article); err != nil {
-		return ctx.Status(400).JSON(fiber.Map{"error": "Cannot parse JSON"})
+	article := new(model.News)
+	if err := ctx.BodyParser(article); err != nil {
+		helper.RespondJSON(ctx, fiber.StatusBadRequest, "Cannot parse JSON", nil, err.Error())
+		return err
 	}
-	database.DB.Create(&Article)
-	return ctx.JSON(Article)
+
+	if err := database.DB.Create(&article).Error; err != nil {
+		helper.RespondJSON(ctx, fiber.StatusInternalServerError, "Failed to create article", nil, err.Error())
+		return err
+	}
+	helper.RespondJSON(ctx, fiber.StatusOK, "Successfully create article", article, nil)
+	return nil
 }
 
 func UpdateArticle(ctx *fiber.Ctx) error {
 	id := ctx.Params("id")
-	var Article model.News
-	result := database.DB.First(&Article, id)
-	if result.Error != nil {
-		return ctx.Status(404).JSON(fiber.Map{"error": "Article not found"})
+	var article model.News
+	if err := database.DB.First(&article, id).Error; err != nil {
+		helper.RespondJSON(ctx, fiber.StatusNotFound, "Article not found", nil, err.Error())
+		return err
 	}
-	if err := ctx.BodyParser(&Article); err != nil {
-		return ctx.Status(400).JSON(fiber.Map{"error": "Cannot parse JSON"})
+
+	if err := ctx.BodyParser(&article); err != nil {
+		helper.RespondJSON(ctx, fiber.StatusBadRequest, "Cannot parse JSON", nil, err.Error())
+		return err
 	}
-	database.DB.Save(&Article)
-	return ctx.JSON(Article)
+	if err := database.DB.Save(&article).Error; err != nil {
+		helper.RespondJSON(ctx, fiber.StatusInternalServerError, "Failed to update article", nil, err.Error())
+		return err
+	}
+	helper.RespondJSON(ctx, fiber.StatusOK, "Successfully update article", article, nil)
+	return nil
 }
 
 func DeleteArticle(ctx *fiber.Ctx) error {
 	id := ctx.Params("id")
-	var Article model.News
-	result := database.DB.First(&Article, id)
-	if result.Error != nil {
-		return ctx.Status(404).JSON(fiber.Map{"error": "Article not found"})
+	var article model.News
+	if err := database.DB.First(&article, id).Error; err != nil {
+		helper.RespondJSON(ctx, fiber.StatusBadRequest, "Article not found", nil, nil)
+		return err
 	}
-	database.DB.Delete(&Article)
-	return ctx.SendStatus(204)
+
+	if err := database.DB.Delete(&article).Error; err != nil {
+		helper.RespondJSON(ctx, fiber.StatusInternalServerError, "Failed to delete article", nil, err.Error())
+		return err
+	}
+	helper.RespondJSON(ctx, fiber.StatusOK, "Article deleted successfully", nil, nil)
+	return nil
 }

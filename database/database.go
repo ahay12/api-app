@@ -1,11 +1,12 @@
 package database
 
 import (
+	"log"
+	"time"
+
 	"github.com/ahay12/api-app/model"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"log"
-	"time"
 )
 
 var DB *gorm.DB
@@ -31,7 +32,7 @@ func InitDatabase() *gorm.DB {
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
 	err = DB.AutoMigrate(&model.Users{})
-	err = DB.AutoMigrate(&model.Products{})
+	err = DB.AutoMigrate(&model.News{})
 	if err != nil {
 		log.Fatal("Failed to migrate database")
 	}

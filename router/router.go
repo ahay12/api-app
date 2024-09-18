@@ -1,6 +1,7 @@
 package router
 
 import (
+	"github.com/ahay12/api-app/middleware"
 	"github.com/ahay12/api-app/service"
 	"github.com/gofiber/fiber/v2"
 )
@@ -18,19 +19,28 @@ func Make() *fiber.App {
 	app := fiber.New()
 	app.Use(Cors())
 	v1 := app.Group("/api/v1")
+
+	// Public routes
 	{
 		v1.Get("/articles", service.GetArticles)
 		v1.Get("/article/:id", service.GetArticle)
-		v1.Post("/article", service.CreateArticle)
-		v1.Put("/article/:id", service.UpdateArticle)
-		v1.Delete("/article/:id", service.DeleteArticle)
+	}
+
+	{
+
+		v1.Post("/article", middleware.AdminMiddleware, service.CreateArticle)
+		v1.Put("/article/:id", middleware.AdminMiddleware, service.UpdateArticle)
+		v1.Delete("/article/:id", middleware.AdminMiddleware, service.DeleteArticle)
 	}
 	{
-		v1.Get("/users", service.GetUsers)
-		v1.Get("/users/:id", service.GetUser)
-		v1.Post("/users", service.CreateUser)
-		v1.Put("/users/:id", service.UpdateUser)
-		v1.Delete("/users/:id", service.DeleteUser)
+		v1.Get("/users", middleware.AdminMiddleware, service.GetUsers)
+		v1.Get("/user/:id", middleware.AdminMiddleware, service.GetUser)
+		v1.Post("/user", service.CreateUser)
+		v1.Put("/user/:id", middleware.AdminMiddleware, service.UpdateUser)
+		v1.Delete("/user/:id", middleware.AdminMiddleware, service.DeleteUser)
+	}
+	{
+		v1.Post("/login", service.Login)
 	}
 
 	return app
